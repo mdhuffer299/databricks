@@ -1,2 +1,2 @@
 # databricks-playground
-Repository for data bricks work
+Repository for databricks notebooks
