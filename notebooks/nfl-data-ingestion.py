@@ -37,35 +37,18 @@ for year in years:
   nflDF = spark.read.format("csv").option("header","true").option("inferSchema","true").load(dataPath)
   
   nflDF = nflDF.withColumn("season", lit(year))
-  nflDF.write.format("csv").save("/mnt/nfl-data/pbp-get/test/pbp-"+str(year))
+  
+  nflDF.write.format("csv").option("header","true").save("/mnt/nfl-data/pbp-get/test/pbp-"+str(year))
 
 # COMMAND ----------
 
 # MAGIC %fs
 # MAGIC 
-# MAGIC ls /mnt/nfl-data/pbp-get/test/pbp-2009/
+# MAGIC ls /mnt/nfl-data/pbp-get/test/pbp-2009
 
 # COMMAND ----------
 
-df1 = spark.read.format("csv").options(inferSchema = "true").load("/mnt/nfl-data/pbp-get/test/pbp-2009/*.csv")
-df2 = spark.read.format("csv").options(inferSchema = "true").load("/mnt/nfl-data/pbp-get/test/pbp-2010/*.csv")
-
-# COMMAND ----------
-
-df3 = df1.unionAll(df2)
-
-df1.count()
-#df2.count()
-#df3.count()
-
-#display(df3)
-
-# COMMAND ----------
-
-years = list(range(2009,2019))
-
-for year in years:
-  dbutils.fs.rm('/mnt/nfl-data/pbp-get/pbp-'+str(year)+'/',True)
+dbutils.fs.rm('/mnt/nfl-data/pbp-get/test',True)
 
 # COMMAND ----------
 
