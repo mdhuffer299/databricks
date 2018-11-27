@@ -2,10 +2,14 @@
 import datetime
 import pandas as pd
 from pyspark.sql.functions import lit
+import os
 
 # COMMAND ----------
 
-dbutils.fs.mkdirs("/mnt/nfl-data/pbp-get")
+if os.path.exists("/dbfs/mnt/nfl-data/pbp-get") == True:
+  print("Path Exists")
+else:
+  dbutils.fs.mkdirs("/mnt/nfl-data/pbp-get")
 
 # COMMAND ----------
 
@@ -39,16 +43,3 @@ for year in years:
   nflDF = nflDF.withColumn("season", lit(year))
   
   nflDF.write.format("csv").option("header","true").save("/mnt/nfl-data/pbp-get/test/pbp-"+str(year))
-
-# COMMAND ----------
-
-# MAGIC %fs
-# MAGIC 
-# MAGIC ls /mnt/nfl-data/pbp-get/test/pbp-2009
-
-# COMMAND ----------
-
-dbutils.fs.rm('/mnt/nfl-data/pbp-get/test',True)
-
-# COMMAND ----------
-
