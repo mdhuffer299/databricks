@@ -11,6 +11,10 @@
 # MAGIC 
 # MAGIC We are also able to process static file directories as a stream object.  We are able to read files as a "stream", performing transformations on the stream, and finally writing a stream object back to the Azure Databricks Filesystem.
 # MAGIC 
+# MAGIC More information about cost-savings by streaming files can be found here:
+# MAGIC 
+# MAGIC * [Streaming Jobs](https://databricks.com/blog/2017/05/22/running-streaming-jobs-day-10x-cost-savings.html)
+# MAGIC 
 # MAGIC Structured Streaming is based on the same DataFrame API that we use for regular object reads, but the input table is unbounded.
 
 # COMMAND ----------
@@ -100,7 +104,6 @@ from pyspark.sql.functions import current_timestamp
 airlineStreamDF = (spark
                    .readStream
                    .schema(airlineSchema)
-                   .option("checkpointLocation", checkpointLocation)
                    .option("maxFilesPerTrigger", 1)
                    .csv(airlineReadPath)
                   ).withColumn("timestamp", current_timestamp())
@@ -128,7 +131,8 @@ airlineAggDF = (airlineStreamDF
                 .groupBy(window("timestamp", "30 seconds"), "year", "month", "uniqueCarrier","origin", "dest").agg(avg("arrDelay").alias("avgArrDelay"), avg("depDelay").alias("avgDepDelay"))
                )
 
-#display(airlineAggDF)
+# Comment out the display function below when running notebook end-to-end
+display(airlineAggDF)
 
 # COMMAND ----------
 
@@ -181,3 +185,6 @@ display(df)
 
 dbutils.fs.rm("/tmp/streamPath", True)
 dbutils.fs.rm("/streamCheck", True)
+
+# COMMAND ----------
+
