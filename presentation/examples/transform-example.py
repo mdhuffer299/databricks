@@ -241,6 +241,7 @@ iotDeviceDF.createOrReplaceTempView("iotDeviceDF")
 # COMMAND ----------
 
 iotTableDF = sqlContext.table("iotDeviceTable")
+display(iotTableDF)
 
 # COMMAND ----------
 
@@ -326,4 +327,6 @@ spark.sql("""
 # MAGIC DROP TABLE generic_iot;
 # MAGIC DROP TABLE iot_device_delta;
 # MAGIC DROP TABLE iotdevicetable;
-# MAGIC DROP TABLE iotglobaltable;
+
+# COMMAND ----------
+
