@@ -14,6 +14,9 @@
 # MAGIC * Prior to executing any cells, we must first create a cluster and attach a notebook to the cluster.
 # MAGIC * When you attach a notebook to a cluster, Databricks creates an execution context. An execution context contains the state for a REPL environment for each supported programming language: Python, R, Scala, and SQL. When you run a cell in a notebook, the command is dispatched to the appropriate language REPL environment and run.
 # MAGIC * A cluster has a maximum number of execution contexts (145). Once the number of execution contexts has reached this threshold, you cannot attach a notebook to the cluster or create a new execution context.
+# MAGIC 
+# MAGIC ##### What is a DataFrame?
+# MAGIC * The Apache Spark DataFrame API provides a rich set of functions (select columns, filter, join, aggregate, and so on) that allow you to solve common data analysis problems efficiently. DataFrames also allow you to intermix operations seamlessly with custom Python, R, Scala, and SQL code.
 
 # COMMAND ----------
 
