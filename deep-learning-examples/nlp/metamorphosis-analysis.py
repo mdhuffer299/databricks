@@ -1,5 +1,5 @@
 # Databricks notebook source
-spark.conf.set("fs.azure.account.key.mhufferblob.blob.core.windows.net","replace with key")
+# MAGIC %run /Users/mhuffer@allegient.com/credentials/azure-blob-connection
 
 # COMMAND ----------
 
@@ -42,7 +42,7 @@ display(words_df.select("filtered", "paragraph"))
 
 # COMMAND ----------
 
-from pyspark.sql.functions import explode
+from pyspark.sql.functions import explode, col
 from pyspark.sql.types import IntegerType, FloatType, DoubleType
 
 filtered_words_df = words_df.select("filtered", "paragraph")
@@ -74,6 +74,48 @@ ax.set_xticklabels(labels = word, rotation = 55, size = 8)
 ax.plot(word_index, word_count, 'k-')
 
 display(fig)
+
+# COMMAND ----------
+
+from pyspark.sql.functions import lag, lead
+
+explode_word_df = (filtered_words_df
+                 .withColumn("filtered_word", explode((col("filtered"))))
+                ).select("paragraph", "filtered_word")
+
+explode_word_df.createOrReplaceTempView("explode_word_df")
+
+ordered_word_df = spark.sql("""
+                            SELECT
+                              sub.*
+                              , LAG(sub.filtered_word, 1, 0) OVER(PARTITION BY sub.paragraph ORDER BY sub.paragraph) AS prev_word
+                              , LAG(sub.word_position, 1, 0) OVER(PARTITION BY sub.paragraph ORDER BY sub.paragraph) AS prev_word_pos
+                              , LEAD(sub.filtered_word, 1, 0) OVER(PARTITION BY sub.paragraph ORDER BY sub.paragraph) AS next_word
+                              , LEAD(sub.word_position, 1, 0) OVER(PARTITION BY sub.paragraph ORDER BY sub.paragraph) AS next_word_pos
+                              , word_position - MIN(sub.word_position) OVER(PARTITION BY sub.paragraph ORDER BY sub.paragraph) AS distance_from_start_pos
+                            FROM
+                            (
+                              SELECT 
+                                *
+                                , ROW_NUMBER() OVER(PARTITION BY paragraph ORDER BY paragraph) AS word_position 
+                                FROM explode_word_df
+                             ) AS sub
+                            """)
+
+display(ordered_word_df)
+
+# COMMAND ----------
+
+dbutils.widgets.text("word_search", "gregor")
+
+# COMMAND ----------
+
+word_to_search = dbutils.widgets.get("word_search")
+
+try:
+  display(ordered_word_df.select("filtered_word", "prev_word", "next_word", "paragraph", "distance_from_start_pos").where(col("filtered_word") == word_to_search).collect())
+except:
+  print(word_to_search + " could not be found in the document.  Please try another word!")
 
 # COMMAND ----------
 
